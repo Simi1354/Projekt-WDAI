@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const { Sequelize, DataTypes } = require("sequelize");
+const axios = require("axios");
 
 const app = express();
 app.use(bodyParser.json());
@@ -13,7 +14,10 @@ const sequelize = new Sequelize({
 
 const Order = sequelize.define("Order", {
   userId: { type: DataTypes.INTEGER, allowNull: false },
-  productId: { type: DataTypes.INTEGER, allowNull: false },
+  date: { type: DataTypes.DATE, allowNull: false },
+});
+
+const OrderProduct = sequelize.define("OrderProduct", {
   quantity: { type: DataTypes.INTEGER, allowNull: false },
 });
 
@@ -34,10 +38,15 @@ const authenticate = (req, res, next) => {
 
 async function productExists(productId) {
   try {
-    const product = await Product.findByPk(productId);
-    return product !== null;
+    const response = await axios.head(
+      `http://localhost:3002/products/${productId}`
+    );
+    return response.status === 200; // Product exists
   } catch (err) {
-    throw new Error("Product not found");
+    if (err.response && err.response.status === 404) {
+      return false; // Product does not exist
+    }
+    throw new Error("Product service unavailable or error occurred");
   }
 }
 
@@ -57,6 +66,13 @@ app.get("/orders/:userId", async (req, res) => {
   const orders = await Order.findAll({
     where: { userId: req.params.userId },
     attributes: { exclude: ["createdAt", "updatedAt"] },
+    include: {
+      model: OrderProduct, // Include OrderProduct for quantity information
+      include: {
+        model: Product, // Retrieve associated Product details (but no need to define Product model here)
+        attributes: ["id", "title", "price"], // Adjust attributes as needed
+      },
+    },
   });
   res.json(orders);
 });
@@ -82,7 +98,7 @@ app.post("/orders", authenticate, async (req, res) => {
     // Create the order
     const order = await Order.create({
       userId: req.user.id,
-      date: date || new Date(), // Use provided date or default to now
+      date: date | new Date(),
     });
 
     // Associate products with the order
@@ -117,8 +133,11 @@ app.patch("/orders/:id", authenticate, async (req, res) => {
     const order = await Order.findByPk(id, {
       include: [
         {
-          model: Product,
-          through: { attributes: ["quantity"] },
+          model: OrderProduct,
+          include: {
+            model: Product, // You can still fetch product details, but no need to define Product in the current file
+            attributes: ["id", "title", "price"], // You may add more attributes to return
+          },
         },
       ],
     });

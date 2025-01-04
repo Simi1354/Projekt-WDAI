@@ -49,8 +49,13 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ where: { email } });
-  if (!user || !bcrypt.compareSync(password, user.password)) {
-    return res.status(401).json({ message: "Invalid credentials" });
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: "No account connected to this email" });
+  }
+  if (!bcrypt.compareSync(password, user.password)) {
+    return res.status(401).json({ message: "Invalid password" });
   }
 
   const token = jwt.sign({ id: user.id }, "SECRET_KEY", { expiresIn: "1h" });
