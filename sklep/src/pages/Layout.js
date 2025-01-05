@@ -11,6 +11,12 @@ const Layout = () => {
         <Link className="Navbar_link" to="/koszyk">
           Koszyk
         </Link>
+        <Link className="Navbar_link" to="/rejestracja">
+          Rejestracja
+        </Link>
+        <Link className="Navbar_link" to="/login">
+          Logowanie
+        </Link>
       </nav>
       <Outlet />
     </>
