@@ -7,6 +7,9 @@ const { Sequelize, DataTypes } = require("sequelize");
 const app = express();
 app.use(bodyParser.json());
 
+const cors = require("cors");
+app.use(cors());
+
 const sequelize = new Sequelize({
   dialect: "sqlite",
   storage: "auth.db",
@@ -65,3 +68,21 @@ app.post("/login", async (req, res) => {
 app.listen(3001, () => {
   console.log("Auth Service is running on http://localhost:3001");
 });
+
+// // Użyj middleware CORS
+// app.use(
+//   cors({
+//     origin: "http://localhost:3000", // Zezwól na żądania z tej domeny
+//     methods: ["GET", "POST", "PUT", "DELETE"], // Zezwolone metody
+//     allowedHeaders: ["Content-Type", "Authorization"], // Zezwolone nagłówki
+//   })
+// );
+
+// app.options("*", cors()); // Obsługa preflight dla wszystkich endpointów
+
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+//   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+//   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
+//   next();
+// });

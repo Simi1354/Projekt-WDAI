@@ -3,6 +3,8 @@ import Layout from "./pages/Layout.js";
 import Home from "./pages/Home.js";
 import Cart from "./pages/Cart.js";
 import NoPage from "./pages/NoPage.js";
+import Register from "./pages/components/Register.js";
+import Login from "./pages/components/Login.js";
 
 function App() {
   return (
@@ -12,6 +14,8 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="koszyk" element={<Cart />} />
+            <Route path="/rejestracja" element={<Register />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

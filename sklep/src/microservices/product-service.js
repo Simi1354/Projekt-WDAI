@@ -6,6 +6,9 @@ const { Sequelize, DataTypes } = require("sequelize");
 const app = express();
 app.use(bodyParser.json());
 
+const cors = require("cors");
+app.use(cors());
+
 const sequelize = new Sequelize({
   dialect: "sqlite",
   storage: "products.db",
