@@ -1,28 +1,45 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-const { Sequelize, DataTypes } = require("sequelize");
+const mongoose = require("mongoose");
 const axios = require("axios");
 
 const app = express();
 app.use(bodyParser.json());
 
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: "orders.db",
+// MongoDB URI for the Order Service (same as product service)
+const ATLAS_URI =
+  "mongodb+srv://mateuszjestemja90:MEhb52lqmnzfjSvB@cluster0.0yspy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose
+  .connect(ATLAS_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB Atlas!"))
+  .catch((err) => console.log("Error connecting to MongoDB Atlas:", err));
+
+// Define Mongoose models for Order and OrderProduct
+const orderSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  date: { type: Date, required: true },
 });
 
-const Order = sequelize.define("Order", {
-  userId: { type: DataTypes.INTEGER, allowNull: false },
-  date: { type: DataTypes.DATE, allowNull: false },
+const orderProductSchema = new mongoose.Schema({
+  orderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Order",
+    required: true,
+  },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  quantity: { type: Number, required: true },
 });
 
-const OrderProduct = sequelize.define("OrderProduct", {
-  quantity: { type: DataTypes.INTEGER, allowNull: false },
-});
+const Order = mongoose.model("Order", orderSchema);
+const OrderProduct = mongoose.model("OrderProduct", orderProductSchema);
 
-sequelize.sync().then(() => console.log("Orders database synced."));
-
+// Middleware to authenticate
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -38,43 +55,56 @@ const authenticate = (req, res, next) => {
 
 async function productExists(productId) {
   try {
+    // Use axios to send a HEAD request to the product service to check if the product exists
     const response = await axios.head(
       `http://localhost:3002/products/${productId}`
     );
-    return response.status === 200; // Product exists
+    return response.status === 200; // If the product exists, the status will be 200
   } catch (err) {
     if (err.response && err.response.status === 404) {
-      return false; // Product does not exist
+      return false; // If the product is not found, return false
     }
-    throw new Error("Product service unavailable or error occurred");
+    // Handle other errors (e.g., product-service is down)
+    console.error("Error checking product existence:", err);
+    return false;
   }
 }
 
-// async function productExists(productId) {
-//   try {
-//     await axios.head(`http://localhost:3002/products/${productId}`);
-//     return true;
-//   } catch (err) {
-//     if (err.response && err.response.status === 404) {
-//       return false;
-//     }
-//     throw new Error("Product unavailable");
-//   }
-// }
+app.get("/orders", authenticate, async (req, res) => {
+  try {
+    // Fetch all orders for the authenticated user
+    const orders = await Order.find({ userId: req.user.id })
+      .select("-createdAt -updatedAt")
+      .exec();
 
-app.get("/orders/:userId", async (req, res) => {
-  const orders = await Order.findAll({
-    where: { userId: req.params.userId },
-    attributes: { exclude: ["createdAt", "updatedAt"] },
-    include: {
-      model: OrderProduct, // Include OrderProduct for quantity information
-      include: {
-        model: Product, // Retrieve associated Product details (but no need to define Product model here)
-        attributes: ["id", "title", "price"], // Adjust attributes as needed
-      },
-    },
-  });
-  res.json(orders);
+    const populatedOrders = await Promise.all(
+      orders.map(async (order) => {
+        // Fetch all order products for this order
+        const orderProducts = await OrderProduct.find({
+          orderId: order._id,
+        }).exec();
+
+        // Fetch product details for each product in the order
+        const productDetails = await Promise.all(
+          orderProducts.map(async (orderProduct) => {
+            // Fetch the product details from the product-service
+            const product = await axios.get(
+              `http://localhost:3002/products/${orderProduct.productId}`
+            );
+            // Return the product data along with the quantity from the OrderProduct
+            return { ...product.data, quantity: orderProduct.quantity }; // Use `product.data` instead of `product.toObject()`
+          })
+        );
+
+        // Return the order with the populated product details
+        return { ...order.toObject(), products: productDetails };
+      })
+    );
+
+    res.json(populatedOrders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 app.post("/orders", authenticate, async (req, res) => {
@@ -85,7 +115,7 @@ app.post("/orders", authenticate, async (req, res) => {
   }
 
   try {
-    // Ensure all products exist in the products database
+    // Ensure all products exist in the product-service
     for (const { productId } of products) {
       const exists = await productExists(productId);
       if (!exists) {
@@ -96,79 +126,67 @@ app.post("/orders", authenticate, async (req, res) => {
     }
 
     // Create the order
-    const order = await Order.create({
+    const order = new Order({
       userId: req.user.id,
-      date: date | new Date(),
+      date: date || new Date(),
     });
+    await order.save();
 
     // Associate products with the order
-    for (const { productId, quantity } of products) {
-      await OrderProduct.create({
-        orderId: order.id,
-        productId,
-        quantity,
-      });
-    }
+    const orderProducts = products.map(({ productId, quantity }) => ({
+      orderId: order._id,
+      productId,
+      quantity,
+    }));
+    await OrderProduct.insertMany(orderProducts);
 
     res.status(201).json({
-      id: order.id,
+      id: order._id,
       userId: order.userId,
       date: order.date,
-      products: products,
+      products,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-app.patch("/orders/:id", authenticate, async (req, res) => {
-  const { id } = req.params;
-  const { products } = req.body; // Array of products { productId, quantity }
+app.patch("/orders", authenticate, async (req, res) => {
+  const { orderId, products } = req.body;
 
   if (!Array.isArray(products) || products.length === 0) {
     return res.status(400).json({ message: "Invalid product data" });
   }
 
   try {
-    const order = await Order.findByPk(id, {
-      include: [
-        {
-          model: OrderProduct,
-          include: {
-            model: Product, // You can still fetch product details, but no need to define Product in the current file
-            attributes: ["id", "title", "price"], // You may add more attributes to return
-          },
-        },
-      ],
-    });
+    const order = await Order.findById(orderId).exec();
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     if (String(order.userId) !== String(req.user.id)) {
-      return res.status(403).json({
-        message: "Unauthorized to modify this order",
-      });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to modify this order" });
     }
 
     // Validate all product IDs before updating
-    for (const { productId } of products) {
-      const exists = await productExists(productId);
-      if (!exists) {
-        return res
-          .status(404)
-          .json({ message: `Product ${productId} not found` });
-      }
-    }
+    // for (const { productId } of products) {
+    //   const exists = await productExists(productId);
+    //   if (!exists) {
+    //     return res
+    //       .status(404)
+    //       .json({ message: `Product ${productId} not found` });
+    //   }
+    // }
 
     // Delete old products and add new ones
-    await OrderProduct.destroy({ where: { orderId: order.id } });
+    await OrderProduct.deleteMany({ orderId: order._id }).exec();
 
-    for (const { productId, quantity } of products) {
-      await OrderProduct.create({
-        orderId: order.id,
-        productId,
-        quantity,
-      });
-    }
+    const orderProducts = products.map(({ productId, quantity }) => ({
+      orderId: order._id,
+      productId,
+      quantity,
+    }));
+    await OrderProduct.insertMany(orderProducts);
 
     res.json({ message: "Order updated successfully" });
   } catch (err) {
@@ -176,11 +194,17 @@ app.patch("/orders/:id", authenticate, async (req, res) => {
   }
 });
 
-// app.delete("/orders/:id", authenticate, async (req, res) => {
-//   const result = await Order.destroy({ where: { id: req.params.id } });
-//   if (!result) return res.status(404).json({ message: "Order not found" });
-//   res.json({ message: "Order deleted" });
-// });
+app.delete("/orders", authenticate, async (req, res) => {
+  try {
+    const result = await Order.deleteOne({ _id: req.body.orderId }).exec();
+    if (result.deletedCount === 0)
+      return res.status(404).json({ message: "Order not found" });
+    await OrderProduct.deleteMany({ orderId: req.body.orderId }).exec();
+    res.json({ message: "Order deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 app.listen(3003, () => {
   console.log("Order Service is running on http://localhost:3003");

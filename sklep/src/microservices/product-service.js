@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-const { Sequelize, DataTypes } = require("sequelize");
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(bodyParser.json());
@@ -9,11 +9,31 @@ app.use(bodyParser.json());
 const cors = require("cors");
 app.use(cors());
 
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: "products.db",
+const ATLAS_URI =
+  "mongodb+srv://mateuszjestemja90:MEhb52lqmnzfjSvB@cluster0.0yspy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose
+  .connect(ATLAS_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB Atlas!"))
+  .catch((err) => console.log("Error connecting to MongoDB Atlas:", err));
+
+// Define a Product model using Mongoose
+const ProductSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  price: { type: mongoose.Schema.Types.Decimal128, required: true },
+  description: { type: String, required: true },
+  category: { type: String, required: true },
+  image: { type: String, required: false },
+  rating: {
+    type: Map,
+    of: Number,
+    default: { rate: 0, count: 0 },
+  },
 });
 
+const Product = mongoose.model("Product", ProductSchema);
+
+// Authentication middleware
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -27,49 +47,46 @@ const authenticate = (req, res, next) => {
   }
 };
 
-const Product = sequelize.define("Product", {
-  title: { type: DataTypes.STRING, allowNull: false },
-  price: { type: DataTypes.DECIMAL, allowNull: false },
-  description: { type: DataTypes.STRING, allowNull: false },
-  category: { type: DataTypes.STRING, allowNull: false },
-  image: { type: DataTypes.STRING, allowNull: true },
-  rating: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    get() {
-      const value = this.getDataValue("rating");
-      return value ? JSON.parse(value) : { rate: 0, count: 0 };
-    },
-    set(value) {
-      this.setDataValue("rating", JSON.stringify(value));
-    },
-  },
-});
+// Routes for Products
 
-sequelize.sync().then(() => console.log("Products database synced."));
-
+// Get all products
 app.get("/products", async (req, res) => {
-  const products = await Product.findAll();
-  res.json(products);
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Database error" });
+  }
 });
 
-app.get("/products/:id", async (req, res) => {
-  const product = await Product.findByPk(req.params.id);
-  if (!product) return res.status(404).json({ message: "Product not found" });
-  res.json(product);
+// Get a product by ID
+app.get("/products/oneproduct", async (req, res) => {
+  try {
+    const product = await Product.findById(req.body.productId);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: "Database error" });
+  }
 });
 
-app.head("/products/:id", async (req, res) => {
-  const product = await Product.findByPk(req.params.id);
-  if (!product) return res.status(404).json({ message: "Product not found" });
-  res.status(200).end();
+// Head request for checking if product exists
+app.head("/products", async (req, res) => {
+  try {
+    const product = await Product.findById(req.body.productId);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.status(200).end();
+  } catch (err) {
+    res.status(500).json({ message: "Database error" });
+  }
 });
 
+// Create a new product
 app.post("/products", authenticate, async (req, res) => {
   const { title, price, description, category, image, rating } = req.body;
 
   try {
-    const product = await Product.create({
+    const product = new Product({
       title,
       price,
       description,
@@ -77,17 +94,24 @@ app.post("/products", authenticate, async (req, res) => {
       image,
       rating,
     });
-    res.status(201).json({ id: product.id });
+    await product.save();
+    res.status(201).json({ id: product._id });
   } catch (err) {
     res.status(500).json({ message: "Database error" });
   }
 });
 
-// app.delete("/products/:id", authenticate, async (req, res) => {
-//   const result = await Product.destroy({ where: { id: req.params.id } });
-//   if (!result) return res.status(404).json({ message: "Product not found" });
-//   res.json({ message: "Product deleted" });
-// });
+// Delete a product
+app.delete("/products", authenticate, async (req, res) => {
+  try {
+    const result = await Product.deleteOne({ _id: req.body.productId });
+    if (result.deletedCount === 0)
+      return res.status(404).json({ message: "Product not found" });
+    res.json({ message: "Product deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Database error" });
+  }
+});
 
 app.listen(3002, () => {
   console.log("Product Service is running on http://localhost:3002");
