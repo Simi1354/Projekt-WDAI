@@ -60,7 +60,7 @@ app.get("/products", async (req, res) => {
 });
 
 // Get a product by ID
-app.get("/products/oneproduct", async (req, res) => {
+app.post("/products/oneproduct", async (req, res) => {
   try {
     const product = await Product.findById(req.body.productId);
     if (!product) return res.status(404).json({ message: "Product not found" });

@@ -12,8 +12,9 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3002/products/oneproduct`
+        const response = await axios.post(
+          `http://localhost:3002/products/oneproduct`,
+          { productId: id }
         );
         setProduct(response.data);
       } catch (err) {
