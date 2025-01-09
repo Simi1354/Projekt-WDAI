@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import * as Icon from "react-bootstrap-icons";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -50,11 +51,32 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
         <button type="submit" className="login-button">
+          <Icon.BoxArrowInRight
+            size={30}
+            style={{
+              marginTop: "-5px",
+              marginBottom: "-9px",
+              marginRight: "4px",
+              justifyContent: "center",
+            }}
+          />{" "}
           Zaloguj się
         </button>
         <p className="login_p"> Nie masz konta? </p>
-        <Link to="/rejestracja" className="login-button">
-          {" "}
+        <Link
+          to="/rejestracja"
+          className="login-button"
+          style={{ alignItems: "center" }}
+        >
+          <Icon.PersonAdd
+            size={30}
+            style={{
+              marginTop: "-5px",
+              marginBottom: "-9px",
+              marginRight: "4px",
+              justifyContent: "center",
+            }}
+          />{" "}
           Zarejestruj się{" "}
         </Link>
       </form>

@@ -1,31 +1,36 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { set } from "mongoose";
+import * as Icon from "react-bootstrap-icons";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    try {
-      const response = await axios.post("http://localhost:3001/register", {
-        email,
-        password,
-      });
-      setMessage("Zarejestrowano pomyślnie! Możesz się zalogować.");
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
-    } catch (error) {
-      if (error.response) {
-        setMessage(error.response.data.message);
-      } else {
-        setMessage("Błąd rejestracji. Spróbuj ponownie");
+    if (password !== password2) {
+      setMessage("Hasła nie są takie same");
+    } else {
+      try {
+        // eslint-disable-next-line
+        const response = await axios.post("http://localhost:3001/register", {
+          email,
+          password,
+        });
+        setMessage("Zarejestrowano pomyślnie! Możesz się zalogować.");
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } catch (error) {
+        if (error.response) {
+          setMessage(error.response.data.message);
+        } else {
+          setMessage("Błąd rejestracji. Spróbuj ponownie");
+        }
       }
     }
   };
@@ -46,6 +51,13 @@ const Register = () => {
           placeholder="Hasło"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          className="login-input"
+          placeholder="Powtórz hasło"
+          value={password2}
+          onChange={(e) => setPassword2(e.target.value)}
           required
         />
         <button type="submit" className="login-button">
