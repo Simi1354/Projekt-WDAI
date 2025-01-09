@@ -20,7 +20,9 @@ const Login = () => {
       });
       const token = response.data.token;
       localStorage.setItem("token", token);
-      setIsLoggedIn(token ? true : false);
+      setTimeout(() => {
+        setIsLoggedIn(token ? true : false);
+      }, 1000);
       setMessage("Login successful!");
       setTimeout(() => {
         navigate("/");

@@ -13,7 +13,7 @@ const Account = () => {
         <button
           onClick={handleLogout}
           className="login-button"
-          style={{ width: "50%", alignItems: "center" }}
+          style={{ width: "30%", alignItems: "center" }}
         >
           <Icon.BoxArrowRight
             size={30}
