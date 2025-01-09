@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as Icon from "react-bootstrap-icons";
+import { AuthContext } from "./AuthContext.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,6 +20,7 @@ const Login = () => {
       });
       const token = response.data.token;
       localStorage.setItem("token", token);
+      setIsLoggedIn(token ? true : false);
       setMessage("Login successful!");
       setTimeout(() => {
         navigate("/");
@@ -60,7 +62,7 @@ const Login = () => {
               justifyContent: "center",
             }}
           />{" "}
-          Zaloguj się
+          Zaloguj się{" "}
         </button>
         <p className="login_p"> Nie masz konta? </p>
         <Link

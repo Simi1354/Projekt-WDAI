@@ -1,5 +1,3 @@
-import * as Icon from "react-bootstrap-icons";
-
 function Cart() {
   return (
     <>
