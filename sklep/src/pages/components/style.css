@@ -5,9 +5,14 @@ General styles body {
   padding: 0;
 }
 
-* {
-  text-decoration: none;
+.product-link {
+  text-decoration: none !important; /* Ensure no underline */
 }
+
+.product-link:hover {
+  text-decoration: none !important; /* Ensure no underline on hover */
+}
+
 .product-list-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -49,6 +54,7 @@ h1 {
 }
 
 .product-card {
+  text-decoration: none;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -252,4 +258,35 @@ h1 {
 .add-to-cart-button:hover {
   background-color: black;
   color: white;
+}
+
+custom-accordion .accordion-header {
+  background-color: black !important; /* Custom background color for header */
+  color: white !important; /* Custom text color for header */
+}
+
+.custom-accordion .accordion-body {
+  background-color: #333 !important; /* Custom background color for body */
+  color: white !important; /* Custom text color for body */
+}
+
+.custom-accordion .accordion-item {
+  border: 1px solid #444 !important; /* Custom border color for item */
+}
+
+.product-title-cart {
+  flex: 1;
+  font-weight: bold;
+}
+
+.product-price-cart {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.cart-item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-right: 10px;
 }

@@ -23,6 +23,7 @@ const Login = () => {
       setTimeout(() => {
         setIsLoggedIn(token ? true : false);
       }, 1000);
+      localStorage.setItem("currentUser", email);
       setMessage("Login successful!");
       setTimeout(() => {
         navigate("/");
@@ -58,8 +59,7 @@ const Login = () => {
           <Icon.BoxArrowInRight
             size={30}
             style={{
-              marginTop: "-5px",
-              marginBottom: "-9px",
+              marginTop: "-3px",
               marginRight: "4px",
               justifyContent: "center",
             }}
@@ -75,8 +75,7 @@ const Login = () => {
           <Icon.PersonAdd
             size={30}
             style={{
-              marginTop: "-5px",
-              marginBottom: "-9px",
+              marginTop: "-3px",
               marginRight: "4px",
               justifyContent: "center",
             }}

@@ -9,6 +9,7 @@ import Login from "./pages/components/Login";
 import ProductList from "./pages/components/ProductList";
 import ProductDetail from "./pages/components/ProductDetail";
 import ProtectedRoute from "./pages/components/ProtectedRoute";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (

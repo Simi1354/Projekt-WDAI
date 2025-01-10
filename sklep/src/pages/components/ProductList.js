@@ -56,7 +56,11 @@ const ProductList = () => {
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <div className="product-card" key={product._id}>
-              <Link to={`/produkty/${product._id}`} className="product-link">
+              <Link
+                to={`/produkty/${product._id}`}
+                className="product-link"
+                style={{ textDecoration: "none !important" }}
+              >
                 <img
                   src={product.image}
                   alt={product.title}

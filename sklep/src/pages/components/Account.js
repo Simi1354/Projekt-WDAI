@@ -3,6 +3,7 @@ import * as Icon from "react-bootstrap-icons";
 const Account = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
     window.location.href = "/login";
   };
 
@@ -18,8 +19,7 @@ const Account = () => {
           <Icon.BoxArrowRight
             size={30}
             style={{
-              marginTop: "-5px",
-              marginBottom: "-9px",
+              marginTop: "-4px",
               marginRight: "4px",
               justifyContent: "center",
             }}

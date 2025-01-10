@@ -31,6 +31,24 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
+  const handleAddToCart = () => {
+    const currentUser = localStorage.getItem("currentUser");
+    const cartKey = `cart_${currentUser}`;
+    const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+    const productInCart = cart.find((item) => item._id === product._id);
+
+    if (productInCart) {
+      productInCart.quantity += counter;
+    } else {
+      cart.push({ ...product, quantity: counter });
+    }
+
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+    setTimeout(() => {
+      navigate("/koszyk");
+    }, 1000);
+  };
+
   if (loading) return <div className="loading">Ładowanie...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!product) return <div className="error">Produkt nie znaleziony</div>;
@@ -54,9 +72,9 @@ const ProductDetail = () => {
           <p>
             <strong>Kategoria:</strong> {product.category}
           </p>
-          {/* <p>
+          <p>
             <strong>ID Produktu:</strong> {product._id}
-          </p> */}
+          </p>
           <div class name="counter">
             <div className="counter-box">
               <button
@@ -113,6 +131,7 @@ const ProductDetail = () => {
           <button
             className="add-to-cart-button"
             onClick={() => {
+              handleAddToCart();
               setTimeout(() => {
                 navigate("/koszyk");
               }, 1000);
