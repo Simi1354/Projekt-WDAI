@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import * as Icon from "react-bootstrap-icons";
 
 const Register = () => {
   const [email, setEmail] = useState("");

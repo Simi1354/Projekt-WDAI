@@ -150,7 +150,7 @@
 				}
 			],
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
@@ -643,6 +643,149 @@
 					"port": "3004",
 					"path": [
 						"ratings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2JkNDczOTU3YzljNmRlZDUyZGRiYiIsImlhdCI6MTczNjU1NDI1NiwiZXhwIjoxNzM2NTU3ODU2fQ.Nq-ujy3JQvaJyigvXoEMp1rNhCZPlbImxq9R2G_qk68",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3005/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3005",
+					"path": [
+						"cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add product to cart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2JkNDczOTU3YzljNmRlZDUyZGRiYiIsImlhdCI6MTczNjU1NDI1NiwiZXhwIjoxNzM2NTU3ODU2fQ.Nq-ujy3JQvaJyigvXoEMp1rNhCZPlbImxq9R2G_qk68",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n    //   {\r\n    //     \"productId\": \"677d51ae70589abc2278cf38\",\r\n    //     \"quantity\": 4\r\n    //   }\r\n    //   {\r\n    //     \"productId\": \"677bd54f7a760c6a8f10ddef\",\r\n    //     \"quantity\": 1\r\n    //   }\r\n      {\r\n        \"productId\": \"677d519570589abc2278cf32\",\r\n        \"quantity\": 6\r\n      }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3005/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3005",
+					"path": [
+						"cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete product from cart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2JkNDczOTU3YzljNmRlZDUyZGRiYiIsImlhdCI6MTczNjU1NDI1NiwiZXhwIjoxNzM2NTU3ODU2fQ.Nq-ujy3JQvaJyigvXoEMp1rNhCZPlbImxq9R2G_qk68",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\r\n        \"productId\": \"677d519570589abc2278cf32\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3005/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3005",
+					"path": [
+						"cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch product quantity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2JkNDczOTU3YzljNmRlZDUyZGRiYiIsImlhdCI6MTczNjU1NDI1NiwiZXhwIjoxNzM2NTU3ODU2fQ.Nq-ujy3JQvaJyigvXoEMp1rNhCZPlbImxq9R2G_qk68",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"productId\": \"677bd54f7a760c6a8f10ddef\",\r\n        \"quantity\": 2137\r\n      }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3005/cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3005",
+					"path": [
+						"cart"
 					]
 				}
 			},

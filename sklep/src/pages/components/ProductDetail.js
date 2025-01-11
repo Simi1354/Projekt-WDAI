@@ -31,22 +31,33 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     const currentUser = localStorage.getItem("currentUser");
-    const cartKey = `cart_${currentUser}`;
-    const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
-    const productInCart = cart.find((item) => item._id === product._id);
+    const token = localStorage.getItem("token");
 
-    if (productInCart) {
-      productInCart.quantity += counter;
-    } else {
-      cart.push({ ...product, quantity: counter });
-    }
-
-    localStorage.setItem(cartKey, JSON.stringify(cart));
-    setTimeout(() => {
+    try {
+      await axios.post(
+        "http://localhost:3005/cart",
+        {
+          userId: currentUser,
+          product: {
+            productId: product._id,
+            title: product.title,
+            price: product.price.$numberDecimal,
+            quantity: counter,
+            image: product.image,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       navigate("/koszyk");
-    }, 1000);
+    } catch (err) {
+      console.error("Błąd dodawania do koszyka:", err);
+    }
   };
 
   if (loading) return <div className="loading">Ładowanie...</div>;
@@ -75,10 +86,10 @@ const ProductDetail = () => {
           <p>
             <strong>ID Produktu:</strong> {product._id}
           </p>
-          <div class name="counter">
+          <div className="counter">
             <div className="counter-box">
               <button
-                onClick={() => setCounter((prev) => Math.max(prev - 1, 0))}
+                onClick={() => setCounter((prev) => Math.max(prev - 1, 1))}
                 className={
                   counter > 1
                     ? "active-counter-button"
@@ -100,11 +111,12 @@ const ProductDetail = () => {
                 border: "1px solid #ddd",
                 width: "48px",
                 height: "48px",
-                fontSize: "1.5rem",
-                fontWeight: "bold",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {counter}
+              <b>{counter}</b>
             </div>
             <div className="counter-box">
               <button
@@ -128,19 +140,11 @@ const ProductDetail = () => {
             </div>
             <div className="in-stock"> Dostępnych sztuk: {inStock} </div>
           </div>
-          <button
-            className="add-to-cart-button"
-            onClick={() => {
-              handleAddToCart();
-              setTimeout(() => {
-                navigate("/koszyk");
-              }, 1000);
-            }}
-          >
+          <button className="add-to-cart-button" onClick={handleAddToCart}>
             <Icon.CartPlus
               size={35}
               style={{ marginRight: "10px", marginBottom: "-5px" }}
-            ></Icon.CartPlus>
+            />
             Dodaj do koszyka
           </button>
         </div>

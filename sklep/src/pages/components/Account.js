@@ -9,7 +9,7 @@ const Account = () => {
 
   return (
     <div>
-      <h1>Wyloguj się</h1>
+      <h1>Panel użytkownika</h1>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button
           onClick={handleLogout}

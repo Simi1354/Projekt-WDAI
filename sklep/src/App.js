@@ -10,37 +10,40 @@ import ProductDetail from "./pages/components/ProductDetail";
 import ProductList from "./pages/components/ProductList";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ProtectedRoute from "./pages/components/ProtectedRoute";
+import { AuthProvider } from "./pages/components/AuthContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route
-            path="konto"
-            element={
-              <ProtectedRoute>
-                <Account />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="koszyk"
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="rejestracja" element={<Register />} />
-          <Route path="login" element={<Login />} />
-          <Route path="produkty" element={<ProductList />} />
-          <Route path="produkty/:id" element={<ProductDetail />} />
-          <Route path="*" element={<NoPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route
+              path="konto"
+              element={
+                <ProtectedRoute>
+                  <Account />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="koszyk"
+              element={
+                <ProtectedRoute>
+                  <Cart />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="rejestracja" element={<Register />} />
+            <Route path="login" element={<Login />} />
+            <Route path="produkty" element={<ProductList />} />
+            <Route path="produkty/:id" element={<ProductDetail />} />
+            <Route path="*" element={<NoPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
