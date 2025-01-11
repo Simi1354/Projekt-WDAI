@@ -6,7 +6,7 @@ import NoPage from "./pages/NoPage.js";
 import Register from "./pages/components/Register.js";
 import Login from "./pages/components/Login.js";
 import ProductList from "./pages/components/ProductList.js";
-import ProductDetail from "./pages/components/ProductDetails.js";
+import ProductDetail from "./pages/components/ProductDetail.js";
 
 function App() {
   return (
