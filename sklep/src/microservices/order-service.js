@@ -88,8 +88,9 @@ app.get("/orders", authenticate, async (req, res) => {
         const productDetails = await Promise.all(
           orderProducts.map(async (orderProduct) => {
             // Fetch the product details from the product-service
-            const product = await axios.get(
-              `http://localhost:3002/products/${orderProduct.productId}`
+            const product = await axios.post(
+              `http://localhost:3002/products/oneproduct`,
+              { productId: orderProduct.productId }
             );
             // Return the product data along with the quantity from the OrderProduct
             return { ...product.data, quantity: orderProduct.quantity }; // Use `product.data` instead of `product.toObject()`
