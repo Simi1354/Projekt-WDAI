@@ -1,16 +1,13 @@
 import * as Icon from "react-bootstrap-icons";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Accordion from "react-bootstrap/Accordion"; // Import Accordion
+import { Accordion, Card } from "react-bootstrap"; // Import necessary components
 import "./style.css";
-import ProductRatings from "./ProductRatings"; // If you have this component for ratings
 
 const Account = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [productDetails, setProductDetails] = useState({}); // Keep productDetails in a state
-  const [fetchingProductIds, setFetchingProductIds] = useState(new Set()); // Track products being fetched
 
   const token = localStorage.getItem("token");
   const name = localStorage.getItem("currentUserEmail");
@@ -30,7 +27,7 @@ const Account = () => {
         setOrders(response.data);
         setLoading(false);
       } catch (err) {
-        // setError("Failed to fetch orders");
+        setError("Failed to fetch orders");
         setLoading(false);
       }
     };
@@ -40,46 +37,7 @@ const Account = () => {
     } else {
       setLoading(false);
     }
-  }, [token]);
-
-  useEffect(() => {
-    const fetchProductDetails = async (productId) => {
-      if (fetchingProductIds.has(productId)) return; // Prevent duplicate fetching
-      setFetchingProductIds((prevState) => new Set(prevState.add(productId))); // Mark as fetching
-
-      try {
-        const response = await axios.post(
-          "http://localhost:3002/products/oneproduct",
-          { productId }
-        );
-        setProductDetails((prevState) => ({
-          ...prevState,
-          [productId]: response.data,
-        }));
-      } catch (err) {
-        console.error("Error fetching product details:", err);
-      } finally {
-        setFetchingProductIds((prevState) => {
-          const newSet = new Set(prevState);
-          newSet.delete(productId);
-          return newSet;
-        });
-      }
-    };
-
-    // Fetch product details for all products in the current orders
-    orders.forEach((order) => {
-      order.products.forEach((orderProduct) => {
-        // Only fetch product details if not already loaded
-        if (
-          !productDetails[orderProduct.productId] &&
-          !fetchingProductIds.has(orderProduct.productId)
-        ) {
-          fetchProductDetails(orderProduct.productId);
-        }
-      });
-    });
-  }, [orders, productDetails, fetchingProductIds]); // Keep the dependencies up-to-date
+  }, [token, currentUser]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -96,25 +54,32 @@ const Account = () => {
     return <div>{error}</div>;
   }
 
+  const calculateOrderTotal = (products) => {
+    return products.reduce((total, product) => {
+      return (
+        total + parseFloat(product.price.$numberDecimal) * product.quantity
+      );
+    }, 0);
+  };
+
   return (
     <div>
       <h1>Panel użytkownika</h1>
       <h2>Witaj, {name}!</h2>
 
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "20px",
+        }}
+      >
         <button
           onClick={handleLogout}
           className="login-button"
-          style={{ width: "30%", alignItems: "center" }}
+          style={{ width: "30%" }}
         >
-          <Icon.BoxArrowRight
-            size={30}
-            style={{
-              marginTop: "-4px",
-              marginRight: "4px",
-              justifyContent: "center",
-            }}
-          />
+          <Icon.BoxArrowRight size={30} style={{ marginRight: "8px" }} />
           Wyloguj się
         </button>
       </div>
@@ -123,87 +88,56 @@ const Account = () => {
       {orders.length === 0 ? (
         <h2>Nie masz jeszcze żadnego zamówienia.</h2>
       ) : (
-        <Accordion className="custom-accordion">
-          {orders.map((order, orderIndex) => (
-            <Accordion.Item eventKey={orderIndex} key={order._id}>
-              <Accordion.Header>
-                <div className="order-header">
-                  <div>Order ID: {order._id}</div>
-                  <div>
-                    Data zamówienia: {new Date(order.date).toLocaleDateString()}
-                  </div>
-                </div>
-              </Accordion.Header>
-              <Accordion.Body>
-                {order.products.map((orderProduct) => {
-                  const product = productDetails[orderProduct.productId];
+        <div className="orders-list">
+          {orders.map((order) => (
+            <div key={order._id} className="order-item">
+              <h3>Zamówienie ID: {order._id}</h3>
+              <p>
+                Data zamówienia: {new Date(order.date).toLocaleDateString()}
+              </p>
 
-                  if (!product) {
-                    return (
-                      <div key={orderProduct.productId}>
-                        Ładowanie produktu...
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div key={orderProduct.productId}>
-                      <Accordion className="product-accordion">
-                        <Accordion.Item eventKey={orderProduct.productId}>
-                          <Accordion.Header>
-                            <div className="product-title">
-                              {product.title} - Ilość sztuk:{" "}
-                              {orderProduct.quantity}
-                            </div>
-                            <div
-                              className="product-price"
-                              style={{ marginRight: "10px" }}
-                            >
-                              $
-                              {(
-                                product.price.$numberDecimal *
-                                orderProduct.quantity
-                              ).toFixed(2)}
-                            </div>
-                          </Accordion.Header>
-                          <Accordion.Body>
-                            <div className="product-detail-container">
+              <div className="products-list">
+                <Accordion>
+                  {order.products.map((product, index) => (
+                    <Card key={product._id}>
+                      <Accordion.Item eventKey={index.toString()}>
+                        <Accordion.Header className="accordion-header">
+                          {product.title} - Ilość sztuk: {product.quantity},
+                          Cena za wszytskie sztuki: $
+                          {product.quantity * product.price.$numberDecimal}
+                        </Accordion.Header>
+                        <Accordion.Body>
+                          <div className="product-item">
+                            <div className="product-image-wrapper">
                               <img
                                 src={product.image}
                                 alt={product.title}
-                                className="product-detail-image"
+                                className="product-image"
                               />
-                              <div className="product-detail-info">
-                                <p>
-                                  <strong>Opis:</strong> {product.description}
-                                </p>
-                                <p>
-                                  <strong>Cena:</strong> $
-                                  {product.price.$numberDecimal}
-                                </p>
-                                <p>
-                                  <strong>Ilość sztuk:</strong>{" "}
-                                  {orderProduct.quantity}
-                                </p>
-                                <p>
-                                  <strong>Suma zamówienia:</strong> $
-                                  {(
-                                    product.price.$numberDecimal *
-                                    orderProduct.quantity
-                                  ).toFixed(2)}
-                                </p>
-                              </div>
                             </div>
-                          </Accordion.Body>
-                        </Accordion.Item>
-                      </Accordion>
-                    </div>
-                  );
-                })}
-              </Accordion.Body>
-            </Accordion.Item>
+                            <div className="product-details">
+                              <p>Cena: ${product.price.$numberDecimal}</p>
+                              <p>Kategoria: {product.category}</p>
+                              <p>{product.description}</p>
+                            </div>
+                          </div>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    </Card>
+                  ))}
+                </Accordion>
+              </div>
+
+              {/* Calculate and display order total */}
+              <div className="order-total">
+                <strong>
+                  Łączna cena zamówienia: $
+                  {calculateOrderTotal(order.products).toFixed(2)}
+                </strong>
+              </div>
+            </div>
           ))}
-        </Accordion>
+        </div>
       )}
     </div>
   );

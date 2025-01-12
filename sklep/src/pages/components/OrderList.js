@@ -6,7 +6,6 @@ const OrderList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const currentUser = localStorage.getItem("currentUser");
   const token = localStorage.getItem("token");
 
   useEffect(() => {

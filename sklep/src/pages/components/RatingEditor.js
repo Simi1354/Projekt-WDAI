@@ -88,6 +88,7 @@ const RatingEditor = ({ rating, productId, isNew, onUpdate, onCancel }) => {
               setEditedRating({ ...editedRating, description: e.target.value })
             }
             placeholder={isNew ? "Dodaj opinię..." : "Zaktualizuj opinię..."}
+            required
           />
         </div>
 

@@ -58,16 +58,14 @@ const authenticate = (req, res, next) => {
 
 async function productExists(productId) {
   try {
-    // Use axios to send a HEAD request to the product service to check if the product exists
     const response = await axios.head(
       `http://localhost:3002/products/${productId}`
     );
-    return response.status === 200; // If the product exists, the status will be 200
+    return response.status === 200;
   } catch (err) {
     if (err.response && err.response.status === 404) {
-      return false; // If the product is not found, return false
+      return false;
     }
-    // Handle other errors (e.g., product-service is down)
     console.error("Error checking product existence:", err);
     return false;
   }

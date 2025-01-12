@@ -66,6 +66,43 @@ const Cart = () => {
     sum += product.price.$numberDecimal * product.quantity;
   });
 
+  const handleAddOrder = async () => {
+    const currentUser = localStorage.getItem("currentUser");
+    const token = localStorage.getItem("token");
+
+    // Prepare products array to send in the request body
+    const products = cart.map((product) => ({
+      productId: product._id,
+      quantity: product.quantity,
+    }));
+
+    try {
+      // Make the order request
+      await axios.post(
+        "http://localhost:3003/orders",
+        {
+          products: products,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Now delete the products from the cart
+      await axios.delete(`http://localhost:3005/carts/clear/${currentUser}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Zamówienie zostało złożone!");
+    } catch (err) {
+      console.error("Błąd dodawania do zamówienia:", err);
+    }
+  };
+
   return (
     <>
       <h1>Twój koszyk</h1>
@@ -134,6 +171,9 @@ const Cart = () => {
             ))}
           </Accordion>
           <h1>Suma: ${sum.toFixed(2)} </h1>
+          <button className="order-button" onClick={handleAddOrder}>
+            Złóż zamówienie
+          </button>
         </>
       )}
     </>
