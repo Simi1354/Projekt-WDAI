@@ -18,6 +18,15 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas!"))
   .catch((err) => console.log("Error connecting to MongoDB Atlas:", err));
 
+const UserSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true },
+});
+
+// Register User model
+const User = mongoose.model("User", UserSchema);
+
 // Define the Rating model using Mongoose
 const RatingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -49,17 +58,13 @@ const authenticate = (req, res, next) => {
 
 async function productExists(productId) {
   try {
-    // Use axios to send a HEAD request to the product service to check if the product exists
-    const response = await axios.head(
-      `http://localhost:3002/products/${productId}`
+    const response = await axios.post(
+      `http://localhost:3002/products/oneproduct`,
+      { productId }
     );
-    return response.status === 200; // If the product exists, the status will be 200
+    return response.status === 200;
   } catch (err) {
-    if (err.response && err.response.status === 404) {
-      return false; // If the product is not found, return false
-    }
-    // Handle other errors (e.g., product-service is down)
-    console.error("Error checking product existence:", err);
+    console.error("Error checking product:", err);
     return false;
   }
 }
@@ -75,6 +80,45 @@ app.get("/ratings", async (req, res) => {
     }
     res.json(ratings);
   } catch (err) {
+    res.status(500).json({ message: "Database error" });
+  }
+});
+
+// app.post("/ratings/find", async (req, res) => {
+//   try {
+//     const ratings = await Rating.find({ productId: req.body.productId });
+//     if (ratings.length === 0) {
+//       return res.json({ message: "No ratings found for this product" });
+//     }
+//     res.json(ratings);
+//   } catch (err) {
+//     res.status(500).json({ message: "Database error" });
+//   }
+// });
+
+app.post("/ratings/find", async (req, res) => {
+  try {
+    const ratings = await Rating.find({
+      productId: req.body.productId,
+    }).populate("userId", "email _id");
+
+    if (ratings.length === 0) {
+      return res.json({ message: "No ratings found for this product" });
+    }
+
+    const ratingsWithUserEmails = ratings.map((rating) => ({
+      _id: rating._id,
+      productId: rating.productId,
+      rate: rating.rate,
+      description: rating.description,
+      date: rating.date,
+      userId: rating.userId._id,
+      userEmail: rating.userId.email,
+    }));
+
+    res.json(ratingsWithUserEmails);
+  } catch (err) {
+    console.error("Error:", err);
     res.status(500).json({ message: "Database error" });
   }
 });
@@ -120,9 +164,7 @@ app.post("/ratings", authenticate, async (req, res) => {
     productId: productId,
   });
   if (existingRating) {
-    return res
-      .status(409)
-      .json({ message: "You have already rated this product" });
+    return res.status(409).json({ message: "Już oceniłeś/aś ten produkt" });
   }
 
   try {

@@ -7,6 +7,9 @@ const axios = require("axios");
 const app = express();
 app.use(bodyParser.json());
 
+const cors = require("cors");
+app.use(cors());
+
 // MongoDB URI for the Order Service (same as product service)
 const ATLAS_URI =
   "mongodb+srv://mateuszjestemja90:MEhb52lqmnzfjSvB@cluster0.0yspy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
