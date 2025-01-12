@@ -7,6 +7,9 @@ const axios = require("axios");
 const app = express();
 app.use(bodyParser.json());
 
+const cors = require("cors");
+app.use(cors());
+
 // MongoDB URI
 const ATLAS_URI =
   "mongodb+srv://mateuszjestemja90:MEhb52lqmnzfjSvB@cluster0.0yspy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -18,11 +21,14 @@ mongoose
 
 // Define Mongoose schema and model for Cart
 const cartSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  userId: { type: String, required: true },
   products: [
     {
-      productId: { type: mongoose.Schema.Types.ObjectId, required: true },
+      productId: { type: String, required: true },
+      title: { type: String, required: true },
+      price: { type: Number, required: true },
       quantity: { type: Number, required: true },
+      image: { type: String, required: true },
     },
   ],
 });
@@ -38,17 +44,60 @@ const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, "SECRET_KEY");
     req.user = decoded;
     next();
-  } catch {
-    res.status(403).json({ message: "Invalid token" });
+  } catch (err) {
+    res.status(401).json({ message: "Unauthorized" });
   }
 };
 
-// Check if product exists
-async function productExists(productid) {
+app.post("/cart", authenticate, async (req, res) => {
+  const { userId, product } = req.body;
+
+  if (!product.productId || product.quantity == null || product.quantity <= 0) {
+    return res.status(400).json({ message: "Invalid product data" });
+  }
+
   try {
-    const response = await axios.head(`http://localhost:3002/products`, {
-      productId: productid,
-    });
+    const exists = await productExists(product.productId);
+    if (!exists) {
+      return res
+        .status(404)
+        .json({ message: `Product ${product.productId} not found` });
+    }
+
+    let cart = await Cart.findOne({ userId }).exec();
+
+    if (!cart) {
+      cart = new Cart({
+        userId,
+        products: [product],
+      });
+    } else {
+      const productIndex = cart.products.findIndex(
+        (p) => String(p.productId) === String(product.productId)
+      );
+
+      if (productIndex > -1) {
+        cart.products[productIndex].quantity += product.quantity;
+      } else {
+        cart.products.push(product);
+      }
+    }
+
+    await cart.save();
+    res.status(200).json({ message: "Product added to cart" });
+  } catch (err) {
+    console.error("Error adding product to cart:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Check if product exists
+async function productExists(productId) {
+  try {
+    const response = await axios.post(
+      `http://localhost:3002/products/oneproduct`,
+      { productId }
+    );
     return response.status === 200;
   } catch (err) {
     if (err.response && err.response.status === 404) {
@@ -60,9 +109,10 @@ async function productExists(productid) {
 }
 
 // Get the cart for the authenticated user
-app.get("/cart", authenticate, async (req, res) => {
+app.get("/cart/:userId", authenticate, async (req, res) => {
   try {
-    const cart = await Cart.findOne({ userId: req.user.id }).exec();
+    const { userId } = req.params;
+    const cart = await Cart.findOne({ userId }).exec();
     if (!cart) return res.json({ products: [] });
 
     const detailedProducts = await Promise.all(
@@ -77,105 +127,40 @@ app.get("/cart", authenticate, async (req, res) => {
 
     res.json({ products: detailedProducts });
   } catch (err) {
+    console.error("Error fetching cart:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// Add or update products in the cart
-app.post("/cart", authenticate, async (req, res) => {
-  const { productId, quantity } = req.body;
-
-  if (!productId || quantity == null || quantity <= 0) {
-    return res.status(400).json({ message: "Invalid product data" });
-  }
-
+// Delete a product from the cart
+app.delete("/cart/:userId/:productId", authenticate, async (req, res) => {
   try {
-    const exists = await productExists(productId);
-    if (!exists) {
-      return res
-        .status(404)
-        .json({ message: `Product ${productId} not found` });
-    }
-
-    let cart = await Cart.findOne({ userId: req.user.id }).exec();
+    const { userId, productId } = req.params;
+    console.log(`Removing product with ID: ${productId} for user: ${userId}`);
+    const cart = await Cart.findOne({ userId }).exec();
 
     if (!cart) {
-      cart = new Cart({
-        userId: req.user.id,
-        products: [{ productId, quantity }],
-      });
-    } else {
-      const productIndex = cart.products.findIndex(
-        (p) => String(p.productId) === String(productId)
-      );
-
-      if (productIndex > -1) {
-        cart.products[productIndex].quantity += quantity;
-      } else {
-        cart.products.push({ productId, quantity });
-      }
+      return res.status(404).json({ message: "Cart not found" });
     }
-
-    await cart.save();
-    res.status(200).json({ message: "Product added to cart" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Remove a product from the cart
-app.delete("/cart", authenticate, async (req, res) => {
-  const { productId } = req.body;
-
-  if (!productId) {
-    return res.status(400).json({ message: "Product ID is required" });
-  }
-
-  try {
-    const cart = await Cart.findOne({ userId: req.user.id }).exec();
-
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
-
-    cart.products = cart.products.filter(
-      (p) => String(p.productId) !== String(productId)
-    );
-
-    await cart.save();
-    res.status(200).json({ message: "Product removed from cart" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Update quantity of a product in the cart
-app.patch("/cart", authenticate, async (req, res) => {
-  const { productId, quantity } = req.body;
-
-  if (!productId || quantity == null || quantity <= 0) {
-    return res.status(400).json({ message: "Invalid product data" });
-  }
-
-  try {
-    const cart = await Cart.findOne({ userId: req.user.id }).exec();
-
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
 
     const productIndex = cart.products.findIndex(
       (p) => String(p.productId) === String(productId)
     );
 
     if (productIndex > -1) {
-      cart.products[productIndex].quantity = quantity;
+      cart.products.splice(productIndex, 1);
       await cart.save();
-      res.status(200).json({ message: "Cart updated" });
+      console.log(`Product with ID: ${productId} removed from cart`);
+      return res.status(200).json({ message: "Product removed from cart" });
     } else {
-      res.status(404).json({ message: "Product not in cart" });
+      return res.status(404).json({ message: "Product not found in cart" });
     }
   } catch (err) {
+    console.error("Error removing product from cart:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
 app.listen(3005, () => {
-  console.log("Cart Service is running on http://localhost:3005");
+  console.log("Cart service listening on port 3005");
 });
