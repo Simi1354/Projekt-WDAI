@@ -46,6 +46,7 @@ const Register = () => {
           required
         />
         <input
+          type="password"
           className="login-input"
           placeholder="Hasło"
           value={password}
@@ -53,6 +54,7 @@ const Register = () => {
           required
         />
         <input
+          type="password"
           className="login-input"
           placeholder="Powtórz hasło"
           value={password2}
