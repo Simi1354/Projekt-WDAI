@@ -49,17 +49,13 @@ const authenticate = (req, res, next) => {
 
 async function productExists(productId) {
   try {
-    // Use axios to send a HEAD request to the product service to check if the product exists
-    const response = await axios.head(
-      `http://localhost:3002/products/${productId}`
+    const response = await axios.post(
+      `http://localhost:3002/products/oneproduct`,
+      { productId }
     );
-    return response.status === 200; // If the product exists, the status will be 200
+    return response.status === 200;
   } catch (err) {
-    if (err.response && err.response.status === 404) {
-      return false; // If the product is not found, return false
-    }
-    // Handle other errors (e.g., product-service is down)
-    console.error("Error checking product existence:", err);
+    console.error("Error checking product:", err);
     return false;
   }
 }
@@ -68,6 +64,18 @@ async function productExists(productId) {
 
 // Get all ratings for a product
 app.get("/ratings", async (req, res) => {
+  try {
+    const ratings = await Rating.find({ productId: req.body.productId });
+    if (ratings.length === 0) {
+      return res.json({ message: "No ratings found for this product" });
+    }
+    res.json(ratings);
+  } catch (err) {
+    res.status(500).json({ message: "Database error" });
+  }
+});
+
+app.post("/ratings/find", async (req, res) => {
   try {
     const ratings = await Rating.find({ productId: req.body.productId });
     if (ratings.length === 0) {
@@ -120,9 +128,7 @@ app.post("/ratings", authenticate, async (req, res) => {
     productId: productId,
   });
   if (existingRating) {
-    return res
-      .status(409)
-      .json({ message: "You have already rated this product" });
+    return res.status(409).json({ message: "Już oceniłeś/aś ten produkt" });
   }
 
   try {

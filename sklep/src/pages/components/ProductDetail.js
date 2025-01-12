@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./style.css";
 import * as Icon from "react-bootstrap-icons";
+import ProductRatings from "./ProductRatings.js";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -149,6 +150,7 @@ const ProductDetail = () => {
           </button>
         </div>
       </div>
+      <ProductRatings productId={product._id} />
     </>
   );
 };
