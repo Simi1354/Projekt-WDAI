@@ -73,10 +73,10 @@ async function productExists(productId) {
   }
 }
 
-app.get("/orders", authenticate, async (req, res) => {
+app.get("/orders/:userId", authenticate, async (req, res) => {
   try {
     // Fetch all orders for the authenticated user
-    const orders = await Order.find({ userId: req.user.id })
+    const orders = await Order.find({ userId: req.params.userId })
       .select("-createdAt -updatedAt")
       .exec();
 

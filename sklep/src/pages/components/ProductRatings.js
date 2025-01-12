@@ -11,6 +11,7 @@ const ProductRatings = ({ productId }) => {
   const [isEditing, setIsEditing] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const currentUserId = localStorage.getItem("currentUser");
+  const currentUserRole = localStorage.getItem("userRole");
 
   const userRating = ratings.find((rating) => rating.userId === currentUserId);
   const hasUserRated = !!userRating;
@@ -82,7 +83,7 @@ const ProductRatings = ({ productId }) => {
                   <strong>Użytkownik:</strong> {rating.userEmail}
                 </p>
                 <p>
-                  <strong>Ocena:</strong> {rating.rate}
+                  <strong>Ocena:</strong> {rating.rate}/5
                 </p>
                 <p>
                   <strong>Opis:</strong> {rating.description}
@@ -91,30 +92,71 @@ const ProductRatings = ({ productId }) => {
                   <strong>Data:</strong>{" "}
                   {new Date(rating.date).toLocaleDateString()}
                 </p>
-                {rating.userId === currentUserId && (
-                  <div className="rating-buttons">
-                    <button
-                      className="edit-button"
-                      onClick={() => setIsEditing(rating._id)}
-                    >
-                      <Icon.Pencil
-                        size={30}
-                        style={{ marginRight: "10px", marginTop: "-5px" }}
-                      />
-                      Edytuj opinię
-                    </button>
-                    <button
-                      className="edit-button"
-                      onClick={() => handleDelete(rating._id)}
-                    >
-                      <Icon.Trash
-                        size={30}
-                        style={{ marginRight: "10px", marginTop: "-5px" }}
-                      />
-                      Usuń opinię
-                    </button>
-                  </div>
-                )}
+                {rating.userId === currentUserId &&
+                  currentUserRole !== "admin" && (
+                    <div className="rating-buttons">
+                      <button
+                        className="edit-button"
+                        onClick={() => setIsEditing(rating._id)}
+                      >
+                        <Icon.Pencil
+                          size={30}
+                          style={{ marginRight: "10px", marginTop: "-5px" }}
+                        />
+                        Edytuj opinię
+                      </button>
+                      <button
+                        className="edit-button"
+                        onClick={() => handleDelete(rating._id)}
+                      >
+                        <Icon.Trash
+                          size={30}
+                          style={{ marginRight: "10px", marginTop: "-5px" }}
+                        />
+                        Usuń opinię
+                      </button>
+                    </div>
+                  )}
+                {rating.userId !== currentUserId &&
+                  currentUserRole === "admin" && (
+                    <div className="rating-buttons">
+                      <button
+                        className="edit-button"
+                        onClick={() => handleDelete(rating._id)}
+                      >
+                        <Icon.Trash
+                          size={30}
+                          style={{ marginRight: "10px", marginTop: "-5px" }}
+                        />
+                        Usuń opinię
+                      </button>
+                    </div>
+                  )}
+                {rating.userId === currentUserId &&
+                  currentUserRole === "admin" && (
+                    <div className="rating-buttons">
+                      <button
+                        className="edit-button"
+                        onClick={() => setIsEditing(rating._id)}
+                      >
+                        <Icon.Pencil
+                          size={30}
+                          style={{ marginRight: "10px", marginTop: "-5px" }}
+                        />
+                        Edytuj opinię
+                      </button>
+                      <button
+                        className="edit-button"
+                        onClick={() => handleDelete(rating._id)}
+                      >
+                        <Icon.Trash
+                          size={30}
+                          style={{ marginRight: "10px", marginTop: "-5px" }}
+                        />
+                        Usuń opinię
+                      </button>
+                    </div>
+                  )}
               </>
             )}
           </div>
