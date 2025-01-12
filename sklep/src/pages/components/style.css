@@ -316,16 +316,20 @@ custom-accordion .accordion-header {
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin: 20px auto;
+  margin: 50px;
   padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
   background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .rating-editor select {
-  width: 60px !important;
+  width: auto !important;
   padding: 8px;
   margin-right: 10px;
   margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .rating-editor textarea {
@@ -336,6 +340,7 @@ custom-accordion .accordion-header {
   min-height: 130px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .rating-editor .button-group {

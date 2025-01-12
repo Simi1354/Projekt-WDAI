@@ -79,6 +79,9 @@ const ProductRatings = ({ productId }) => {
             ) : (
               <>
                 <p>
+                  <strong>Użytkownik:</strong> {rating.userEmail}
+                </p>
+                <p>
                   <strong>Ocena:</strong> {rating.rate}
                 </p>
                 <p>
