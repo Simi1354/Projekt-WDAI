@@ -57,8 +57,6 @@ const ProductList = () => {
 
   return (
     <div className="product-list-container">
-      <h1>Produkty</h1>
-
       <div className="search-bar">
         <input
           type="text"

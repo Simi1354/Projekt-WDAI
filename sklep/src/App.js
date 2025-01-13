@@ -11,7 +11,6 @@ import ProductList from "./pages/components/ProductList";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ProtectedRoute from "./pages/components/ProtectedRoute";
 import { AuthProvider } from "./pages/components/AuthContext";
-import RatingEditor from "./pages/components/RatingEditor";
 
 function App() {
   return (
@@ -40,10 +39,6 @@ function App() {
             <Route path="login" element={<Login />} />
             <Route path="produkty" element={<ProductList />} />
             <Route path="produkty/:id" element={<ProductDetail />} />
-            <Route
-              path="produkty/:id/edycjaopinii"
-              element={<RatingEditor />}
-            />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

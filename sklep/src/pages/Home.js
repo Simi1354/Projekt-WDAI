@@ -3,11 +3,10 @@ import ProductList from "./components/ProductList.js";
 function Home() {
   return (
     <>
-      <h1> Strona główna </h1>
-      <h2>
-        Witaj na naszej stronie internetowej, gdzie kupisz wszystkie potrzebne w
-        życiu codziennym artykuły.
-      </h2>
+      <h1 style={{ marginTop: "20px", marginBottom: "20px" }}>
+        {" "}
+        Strona główna{" "}
+      </h1>
       <ProductList></ProductList>
     </>
   );

@@ -67,23 +67,6 @@ const Account = () => {
       <h1>Panel użytkownika</h1>
       <h2>Witaj, {name}!</h2>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginBottom: "20px",
-        }}
-      >
-        <button
-          onClick={handleLogout}
-          className="login-button"
-          style={{ width: "30%" }}
-        >
-          <Icon.BoxArrowRight size={30} style={{ marginRight: "8px" }} />
-          Wyloguj się
-        </button>
-      </div>
-
       <h1>Twoje zamówienia</h1>
       {orders.length === 0 ? (
         <h2>Nie masz jeszcze żadnego zamówienia.</h2>
@@ -97,7 +80,7 @@ const Account = () => {
               </p>
 
               <div className="products-list">
-                <Accordion>
+                <Accordion className="custom-accordion">
                   {order.products.map((product, index) => (
                     <Card key={product._id}>
                       <Accordion.Item eventKey={index.toString()}>
@@ -139,6 +122,22 @@ const Account = () => {
           ))}
         </div>
       )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <button
+          onClick={handleLogout}
+          className="login-button"
+          style={{ width: "30%" }}
+        >
+          <Icon.BoxArrowRight size={30} style={{ marginRight: "8px" }} />
+          Wyloguj się
+        </button>
+      </div>
     </div>
   );
 };
