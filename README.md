@@ -54,6 +54,8 @@ W sześciu terminalach należy wpisać poniższe komendy:
 
 ### Mikroserwisy
 
+#### Link do dokumentacji POSTMAN online
+https://documenter.getpostman.com/view/39990053/2sAYQWKDUg#template-made-by-mateusz-nowak-szymon-balicki
 #### Auth Service
 
 - Ścieżka: `src/microservices/auth-service.js`
