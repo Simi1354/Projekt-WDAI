@@ -22,6 +22,7 @@ Zostały w nim użyte biblioteki:
 - BCryptJS
 - CORS
 - Body Parser
+- Axios
 
 #### Uruchomienie projektu
 
