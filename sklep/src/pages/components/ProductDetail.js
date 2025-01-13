@@ -14,7 +14,6 @@ const ProductDetail = () => {
   const inStock = 20;
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -62,6 +61,16 @@ const ProductDetail = () => {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+  if (!product) {
+    return <div>Product not found.</div>;
+  }
 
   return (
     <>

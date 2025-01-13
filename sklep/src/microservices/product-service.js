@@ -71,9 +71,9 @@ app.post("/products/oneproduct", async (req, res) => {
 });
 
 // Head request for checking if product exists
-app.head("/products", async (req, res) => {
+app.head("/products/:productId", async (req, res) => {
   try {
-    const product = await Product.findById(req.body.productId);
+    const product = await Product.findById(req.params.productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).end();
   } catch (err) {

@@ -58,25 +58,23 @@ const authenticate = (req, res, next) => {
 
 async function productExists(productId) {
   try {
-    // Use axios to send a HEAD request to the product service to check if the product exists
     const response = await axios.head(
       `http://localhost:3002/products/${productId}`
     );
-    return response.status === 200; // If the product exists, the status will be 200
+    return response.status === 200;
   } catch (err) {
     if (err.response && err.response.status === 404) {
-      return false; // If the product is not found, return false
+      return false;
     }
-    // Handle other errors (e.g., product-service is down)
     console.error("Error checking product existence:", err);
     return false;
   }
 }
 
-app.get("/orders", authenticate, async (req, res) => {
+app.get("/orders/:userId", authenticate, async (req, res) => {
   try {
     // Fetch all orders for the authenticated user
-    const orders = await Order.find({ userId: req.user.id })
+    const orders = await Order.find({ userId: req.params.userId })
       .select("-createdAt -updatedAt")
       .exec();
 

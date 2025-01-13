@@ -140,7 +140,7 @@ app.delete("/cart/:userId/:productId", authenticate, async (req, res) => {
     const cart = await Cart.findOne({ userId }).exec();
 
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return res.status(404).json({ message: "Cart with product not found" });
     }
 
     const productIndex = cart.products.findIndex(
@@ -157,6 +157,28 @@ app.delete("/cart/:userId/:productId", authenticate, async (req, res) => {
     }
   } catch (err) {
     console.error("Error removing product from cart:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Clear the user's cart
+app.delete("/carts/clear/:userId", authenticate, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const cart = await Cart.findOne({ userId }).exec();
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Clear all products from the cart
+    cart.products = [];
+    await cart.save();
+
+    console.log(`All products removed from cart for user: ${userId}`);
+    res.status(200).json({ message: "Cart has been cleared" });
+  } catch (err) {
+    console.error("Error clearing cart:", err);
     res.status(500).json({ message: err.message });
   }
 });

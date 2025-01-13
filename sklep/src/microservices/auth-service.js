@@ -57,6 +57,7 @@ app.post("/register", async (req, res) => {
 });
 
 // Login route
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -71,7 +72,7 @@ app.post("/login", async (req, res) => {
   }
 
   const token = jwt.sign({ id: user._id }, "SECRET_KEY", { expiresIn: "1h" });
-  res.json({ token, userId: user._id });
+  res.json({ token, userId: user._id, role: user.role });
 });
 
 app.get("/userrole", async (req, res) => {

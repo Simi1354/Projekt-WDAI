@@ -18,11 +18,12 @@ const Login = () => {
         email,
         password,
       });
-      const { token, userId } = response.data;
+      const { token, userId, role } = response.data;
       localStorage.setItem("token", token);
       setTimeout(() => {
         setIsLoggedIn(token ? true : false);
       }, 1000);
+      localStorage.setItem("userRole", role);
       localStorage.setItem("currentUser", userId);
       localStorage.setItem("currentUserEmail", email);
       setMessage("Login successful!");

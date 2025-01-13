@@ -84,18 +84,6 @@ app.get("/ratings", async (req, res) => {
   }
 });
 
-// app.post("/ratings/find", async (req, res) => {
-//   try {
-//     const ratings = await Rating.find({ productId: req.body.productId });
-//     if (ratings.length === 0) {
-//       return res.json({ message: "No ratings found for this product" });
-//     }
-//     res.json(ratings);
-//   } catch (err) {
-//     res.status(500).json({ message: "Database error" });
-//   }
-// });
-
 app.post("/ratings/find", async (req, res) => {
   try {
     const ratings = await Rating.find({
@@ -123,17 +111,6 @@ app.post("/ratings/find", async (req, res) => {
   }
 });
 
-// Get all ratings by a user
-// app.get("/rating/:userId", async (req, res) => {
-//   try {
-//     const ratings = await Rating.find({ userId: req.params.userId }).select("-createdAt -updatedAt");
-//     if (!ratings) return res.status(404).json({ message: "Rating not found" });
-//     res.json(ratings);
-//   } catch (err) {
-//     res.status(500).json({ message: "Database error" });
-//   }
-// });
-
 // Check if the rating exists (head request)
 app.head("/ratings/:userId/:productId", async (req, res) => {
   try {
@@ -154,11 +131,9 @@ app.head("/ratings/:userId/:productId", async (req, res) => {
 app.post("/ratings", authenticate, async (req, res) => {
   const { productId, rate, description, date } = req.body;
 
-  // Check if the product exists
   const exists = await productExists(productId);
   if (!exists) return res.status(404).json({ message: "Product not found" });
 
-  // Check if the user has already rated this product
   const existingRating = await Rating.findOne({
     userId: req.user.id,
     productId: productId,

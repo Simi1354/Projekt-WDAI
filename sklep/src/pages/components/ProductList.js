@@ -8,6 +8,7 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("price");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -25,8 +26,11 @@ const ProductList = () => {
   }, []);
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSortChange = (e) => {
+    setSortBy(e.target.value);
   };
 
   const filteredProducts = products.filter(
@@ -35,13 +39,24 @@ const ProductList = () => {
       product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const sortedProducts = filteredProducts.sort((a, b) => {
+    if (sortBy === "price") {
+      return (
+        parseFloat(a.price.$numberDecimal) - parseFloat(b.price.$numberDecimal)
+      );
+    } else if (sortBy === "title") {
+      return a.title.localeCompare(b.title);
+    } else if (sortBy === "category") {
+      return a.category.localeCompare(b.category);
+    }
+    return 0;
+  });
+
   if (loading) return <div className="loading">Ładowanie...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="product-list-container">
-      <h1>Produkty</h1>
-
       <div className="search-bar">
         <input
           type="text"
@@ -52,14 +67,28 @@ const ProductList = () => {
         />
       </div>
 
+      <div className="sort-options">
+        <label htmlFor="sort-by">Sortuj według:</label>
+        <select
+          id="sort-by"
+          value={sortBy}
+          onChange={handleSortChange}
+          className="sort-select"
+        >
+          <option value="price">Cena</option>
+          <option value="title">Tytuł</option>
+          <option value="category">Kategoria</option>
+        </select>
+      </div>
+
       <div className="product-list">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
+        {sortedProducts.length > 0 ? (
+          sortedProducts.map((product) => (
             <div className="product-card" key={product._id}>
               <Link
                 to={`/produkty/${product._id}`}
                 className="product-link"
-                style={{ textDecoration: "none !important" }}
+                style={{ textDecoration: "none" }}
               >
                 <img
                   src={product.image}

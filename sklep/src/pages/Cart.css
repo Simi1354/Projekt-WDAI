@@ -68,3 +68,28 @@
   object-fit: cover;
   margin-right: 10px;
 }
+
+.order-button {
+  padding: 2%;
+  margin: 2%;
+  display: block;
+  text-align: center;
+  justify-content: center;
+  background-color: white;
+  color: black;
+  font-size: 2rem;
+  font-weight: bolder;
+  border: 3px solid white;
+  height: 20%;
+  width: 60%;
+  outline: none;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.order-button:hover {
+  background-color: black;
+  color: white;
+}

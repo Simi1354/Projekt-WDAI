@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Accordion } from "react-bootstrap";
 import axios from "axios";
 import "./components/style.css";
@@ -7,6 +8,7 @@ import * as Icon from "react-bootstrap-icons";
 
 const Cart = () => {
   const [cart, setCart] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -66,9 +68,47 @@ const Cart = () => {
     sum += product.price.$numberDecimal * product.quantity;
   });
 
+  const handleAddOrder = async () => {
+    const currentUser = localStorage.getItem("currentUser");
+    const token = localStorage.getItem("token");
+
+    // Prepare products array to send in the request body
+    const products = cart.map((product) => ({
+      productId: product._id,
+      quantity: product.quantity,
+    }));
+
+    try {
+      // Make the order request
+      await axios.post(
+        "http://localhost:3003/orders",
+        {
+          products: products,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Now delete the products from the cart
+      await axios.delete(`http://localhost:3005/carts/clear/${currentUser}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Zamówienie zostało złożone!");
+      navigate("/konto");
+    } catch (err) {
+      console.error("Błąd dodawania do zamówienia:", err);
+    }
+  };
+
   return (
     <>
-      <h1>Twój koszyk</h1>
+      <h1 style={{ marginBottom: "30px" }}>Twój koszyk</h1>
       {cart.length === 0 ? (
         <h1>Koszyk jest pusty</h1>
       ) : (
@@ -97,6 +137,7 @@ const Cart = () => {
                       src={product.image}
                       alt={product.title}
                       className="product-detail-image"
+                      style={{ width: "400px", height: "auto" }}
                     />
                     <div
                       className="product-detail-info"
@@ -134,6 +175,21 @@ const Cart = () => {
             ))}
           </Accordion>
           <h1>Suma: ${sum.toFixed(2)} </h1>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <button className="order-button" onClick={handleAddOrder}>
+              <Icon.Check2Circle
+                size={30}
+                style={{ marginRight: "10px", marginTop: "-5px" }}
+              />
+              Złóż zamówienie
+            </button>
+          </div>
         </>
       )}
     </>
