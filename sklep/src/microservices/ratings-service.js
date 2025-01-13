@@ -160,26 +160,10 @@ app.post("/ratings", authenticate, async (req, res) => {
 // Delete a rating
 app.delete("/ratings", authenticate, async (req, res) => {
   try {
-    if (req.user.role === "admin") {
-      // Admin
-      const result = await Rating.deleteOne({
-        _id: req.body.id,
-        userId: req.user.id,
-      });
-      res.json({ message: `${_id} rating has been deleted` });
-    } else {
-      // Normal user
-      const result = await Rating.deleteOne({
-        _id: req.body.id,
-        userId: req.user.id,
-      });
-      if (result.deletedCount === 0)
-        return res.status(404).json({
-          message:
-            "Rating not found or you don't have permission to delete this rating",
-        });
-      res.json({ message: "Rating deleted" });
-    }
+    const result = await Rating.deleteOne({ _id: req.body.id });
+    if (result.deletedCount === 0)
+      return res.status(404).json({ message: "Rating not found" });
+    res.json({ message: "Rating deleted" });
   } catch (err) {
     res.status(500).json({ message: "Database error" });
   }
