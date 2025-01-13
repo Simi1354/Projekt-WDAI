@@ -19,7 +19,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas!"))
   .catch((err) => console.log("Error connecting to MongoDB Atlas:", err));
 
-// Define a User model using Mongoose
+// User model using Mongoose
 const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true },
@@ -49,7 +49,6 @@ app.post("/register", async (req, res) => {
     res.status(201).json({ id: user._id });
   } catch (err) {
     if (err.code === 11000) {
-      // MongoDB duplicate key error
       return res.status(400).json({ message: "Email already exists" });
     }
     res.status(500).json({ message: "Database error" });

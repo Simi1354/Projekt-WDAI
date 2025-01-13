@@ -19,7 +19,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas!"))
   .catch((err) => console.log("Error connecting to MongoDB Atlas:", err));
 
-// Define Mongoose models for Order and OrderProduct
+// Mongoose models for Order and OrderProduct
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   date: { type: Date, required: true },
@@ -73,32 +73,25 @@ async function productExists(productId) {
 
 app.get("/orders/:userId", authenticate, async (req, res) => {
   try {
-    // Fetch all orders for the authenticated user
     const orders = await Order.find({ userId: req.params.userId })
       .select("-createdAt -updatedAt")
       .exec();
 
     const populatedOrders = await Promise.all(
       orders.map(async (order) => {
-        // Fetch all order products for this order
         const orderProducts = await OrderProduct.find({
           orderId: order._id,
         }).exec();
-
-        // Fetch product details for each product in the order
         const productDetails = await Promise.all(
           orderProducts.map(async (orderProduct) => {
-            // Fetch the product details from the product-service
             const product = await axios.post(
               `http://localhost:3002/products/oneproduct`,
               { productId: orderProduct.productId }
             );
-            // Return the product data along with the quantity from the OrderProduct
-            return { ...product.data, quantity: orderProduct.quantity }; // Use `product.data` instead of `product.toObject()`
+            return { ...product.data, quantity: orderProduct.quantity };
           })
         );
 
-        // Return the order with the populated product details
         return { ...order.toObject(), products: productDetails };
       })
     );
@@ -117,7 +110,6 @@ app.post("/orders", authenticate, async (req, res) => {
   }
 
   try {
-    // Ensure all products exist in the product-service
     for (const { productId } of products) {
       const exists = await productExists(productId);
       if (!exists) {
@@ -127,14 +119,12 @@ app.post("/orders", authenticate, async (req, res) => {
       }
     }
 
-    // Create the order
     const order = new Order({
       userId: req.user.id,
       date: date || new Date(),
     });
     await order.save();
 
-    // Associate products with the order
     const orderProducts = products.map(({ productId, quantity }) => ({
       orderId: order._id,
       productId,
@@ -169,16 +159,6 @@ app.patch("/orders", authenticate, async (req, res) => {
         .status(403)
         .json({ message: "Unauthorized to modify this order" });
     }
-
-    // Validate all product IDs before updating
-    // for (const { productId } of products) {
-    //   const exists = await productExists(productId);
-    //   if (!exists) {
-    //     return res
-    //       .status(404)
-    //       .json({ message: `Product ${productId} not found` });
-    //   }
-    // }
 
     // Delete old products and add new ones
     await OrderProduct.deleteMany({ orderId: order._id }).exec();

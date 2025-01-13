@@ -27,7 +27,7 @@ const Account = () => {
         setOrders(response.data);
         setLoading(false);
       } catch (err) {
-        setError("Failed to fetch orders");
+        // setError("Nie udało się załadować zamówień");
         setLoading(false);
       }
     };
@@ -74,7 +74,7 @@ const Account = () => {
         <div className="orders-list">
           {orders.map((order) => (
             <div key={order._id} className="order-item">
-              <h3>Zamówienie ID: {order._id}</h3>
+              <h3>Zamówienie o numerze ID: {order._id}</h3>
               <p>
                 Data zamówienia: {new Date(order.date).toLocaleDateString()}
               </p>
@@ -114,7 +114,7 @@ const Account = () => {
               {/* Calculate and display order total */}
               <div className="order-total">
                 <strong>
-                  Łączna cena zamówienia: $
+                  Łączna wartość zamówienia: $
                   {calculateOrderTotal(order.products).toFixed(2)}
                 </strong>
               </div>

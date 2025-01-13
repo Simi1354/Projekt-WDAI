@@ -19,7 +19,7 @@ const OrderList = () => {
         setOrders(response.data);
         setLoading(false);
       } catch (err) {
-        setError("Failed to fetch orders");
+        setError("Nie udało się załadować zamówień");
         setLoading(false);
       }
     };
@@ -28,7 +28,7 @@ const OrderList = () => {
   }, [token]);
 
   if (loading) {
-    return <div>Loading orders...</div>;
+    return <div>Ładowanie zamówień...</div>;
   }
 
   if (error) {
@@ -37,19 +37,24 @@ const OrderList = () => {
 
   return (
     <div>
-      <h1>Your Orders</h1>
+      <h1>Twoje zamówienia</h1>
       {orders.length === 0 ? (
-        <p>You have no orders.</p>
+        <p>
+          Nie masz jeszcze żadnego zamówienia. Dodaj produkty do koszyka i
+          zatwierdź koszyk, by pojawiły się tutaj twoje zamówienia.
+        </p>
       ) : (
         <ul>
           {orders.map((order) => (
             <li key={order._id}>
-              <h2>Order ID: {order._id}</h2>
-              <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+              <h2>Zamówienie o numerze ID: {order._id}</h2>
+              <p>
+                Data zamówienia: {new Date(order.date).toLocaleDateString()}
+              </p>
               <ul>
                 {order.products.map((product, index) => (
                   <li key={index}>
-                    <strong>{product.name}</strong> - Quantity:{" "}
+                    <strong>{product.name}</strong> - Ilość produktu:{" "}
                     {product.quantity}
                   </li>
                 ))}

@@ -26,17 +26,18 @@ const Login = () => {
       localStorage.setItem("userRole", role);
       localStorage.setItem("currentUser", userId);
       localStorage.setItem("currentUserEmail", email);
-      setMessage("Login successful!");
+      setMessage("Logowanie udane!");
       setTimeout(() => {
         navigate("/");
       }, 1000);
     } catch (err) {
       console.error(
-        "Login failed:",
+        "Login się nie powiódł:",
         err.response?.data?.message || err.message
       );
       setMessage(
-        "Login failed: " + (err.response?.data?.message || "Unknown error")
+        "Login się nie powiódł: " +
+          (err.response?.data?.message || "Nieznany błąd")
       );
     }
   };

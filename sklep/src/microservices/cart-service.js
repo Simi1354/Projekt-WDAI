@@ -19,7 +19,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas!"))
   .catch((err) => console.log("Error connecting to MongoDB Atlas:", err));
 
-// Define Mongoose schema and model for Cart
+// Mongoose schema and model for Cart
 const cartSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   products: [
@@ -170,8 +170,6 @@ app.delete("/carts/clear/:userId", authenticate, async (req, res) => {
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
-
-    // Clear all products from the cart
     cart.products = [];
     await cart.save();
 

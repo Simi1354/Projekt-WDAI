@@ -6,11 +6,11 @@ General styles body {
 }
 
 .product-link {
-  text-decoration: none !important; /* Ensure no underline */
+  text-decoration: none !important;
 }
 
 .product-link:hover {
-  text-decoration: none !important; /* Ensure no underline on hover */
+  text-decoration: none !important;
 }
 
 .product-list-container {
@@ -75,6 +75,7 @@ h2 {
   width: 100%;
   height: 200px;
   object-fit: contain;
+  max-height: 600px;
 }
 
 .product-details {
@@ -268,17 +269,17 @@ h2 {
 }
 
 custom-accordion .accordion-header {
-  background-color: black !important; /* Custom background color for header */
-  color: white !important; /* Custom text color for header */
+  background-color: black !important;
+  color: white !important;
 }
 
 .custom-accordion .accordion-body {
-  background-color: #333 !important; /* Custom background color for body */
-  color: white !important; /* Custom text color for body */
+  background-color: #333 !important;
+  color: white !important;
 }
 
 .custom-accordion .accordion-item {
-  border: 1px solid #444 !important; /* Custom border color for item */
+  border: 1px solid #444 !important;
 }
 
 .product-title-cart {
@@ -423,16 +424,6 @@ ul {
 li {
   margin: 10px 0;
 }
-
-/* .custom-accordion .accordion-button {
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
-}
-
-.product-accordion .accordion-button {
-  background-color: #e9ecef;
-  border-color: #ced4da;
-} */
 
 .product-detail-container {
   display: flex;
@@ -612,6 +603,19 @@ li {
 .custom-accordion .accordion-button:focus {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
   outline: none !important;
+}
+.sort-order-toggle {
+  margin-left: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  background-color: #000000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.sort-order-toggle:hover {
+  background-color: #26292b;
 }
 
 .custom-accordion .accordion-button:not(.collapsed) {

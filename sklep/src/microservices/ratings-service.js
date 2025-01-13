@@ -174,12 +174,10 @@ app.delete("/ratings", authenticate, async (req, res) => {
         userId: req.user.id,
       });
       if (result.deletedCount === 0)
-        return res
-          .status(404)
-          .json({
-            message:
-              "Rating not found or you don't have permission to delete this rating",
-          });
+        return res.status(404).json({
+          message:
+            "Rating not found or you don't have permission to delete this rating",
+        });
       res.json({ message: "Rating deleted" });
     }
   } catch (err) {

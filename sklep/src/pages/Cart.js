@@ -48,7 +48,6 @@ const Cart = () => {
         }
       );
       console.log(`Product with ID: ${productId} removed`, deleteResponse.data);
-      // Refresh the cart after removing the item
       const response = await axios.get(
         `http://localhost:3005/cart/${currentUser}`,
         {
@@ -72,14 +71,12 @@ const Cart = () => {
     const currentUser = localStorage.getItem("currentUser");
     const token = localStorage.getItem("token");
 
-    // Prepare products array to send in the request body
     const products = cart.map((product) => ({
       productId: product._id,
       quantity: product.quantity,
     }));
 
     try {
-      // Make the order request
       await axios.post(
         "http://localhost:3003/orders",
         {
@@ -92,7 +89,6 @@ const Cart = () => {
         }
       );
 
-      // Now delete the products from the cart
       await axios.delete(`http://localhost:3005/carts/clear/${currentUser}`, {
         headers: {
           Authorization: `Bearer ${token}`,

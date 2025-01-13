@@ -62,14 +62,14 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Ładowanie...</div>;
   }
 
   if (error) {
     return <div>{error}</div>;
   }
   if (!product) {
-    return <div>Product not found.</div>;
+    return <div>Produktu nie udało się znaleźć.</div>;
   }
 
   return (
